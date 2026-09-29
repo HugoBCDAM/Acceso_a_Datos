@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 	public class GestorAplicaciones {
@@ -53,6 +54,8 @@ import java.util.Scanner;
 				System.out.println("Saliendo del programa...");
 				
 			} catch (IOException e) {
+				e.getMessage();
+			} catch (InputMismatchException e) {
 				e.getMessage();
 			}
 			
@@ -181,17 +184,16 @@ import java.util.Scanner;
 		private static void crearFichero(Path p) throws IOException {
 			if (!Files.exists(p)) {
 				Files.createFile(p);
+				FileWriter fw = new FileWriter(p.toFile());
+				BufferedWriter bw = new BufferedWriter(fw);
+				
+				bw.write("ID;NOMBRE;MÓDULO;NOTA");
+				bw.newLine();
+				
+				bw.close();
+				
+				System.out.println("\nFichero creado\n");
 			}
-			
-			FileWriter fw = new FileWriter(p.toFile());
-			BufferedWriter bw = new BufferedWriter(fw);
-			
-			bw.write("ID;NOMBRE;MÓDULO;NOTA");
-			bw.newLine();
-			
-			bw.close();
-			
-			System.out.println("\nFichero creado\n");
 		}
 		
 	}
