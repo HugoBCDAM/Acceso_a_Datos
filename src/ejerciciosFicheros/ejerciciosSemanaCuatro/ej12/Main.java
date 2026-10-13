@@ -1,5 +1,13 @@
 package ejerciciosFicheros.ejerciciosSemanaCuatro.ej12;
 
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -10,6 +18,7 @@ public class Main {
 		Scanner leer = new Scanner(System.in);
 		int opcion;
 		ArrayList<Alumno> alumnos = new ArrayList<>();
+		File f = new File("alumnos_serializados.dat");
 		
 		do {
 			System.out.println("Menú:\n1. Añadir alumno\n2. Mostrar todos los alumnos\n3. Buscar alumno por expediente\n"
@@ -37,8 +46,13 @@ public class Main {
 				mostrarMayorNota(alumnos);
 				break;
 			case 6:
+				eliminarAlumno(leer, alumnos);
 				break;
 			case 7:
+				guardarDatos(alumnos, f);
+				break;
+			case 8:
+				cargarDatos(alumnos, f);
 				break;
 			default:
 				System.out.println("\nDebes introducir una opción válida del menú\n");
@@ -47,6 +61,84 @@ public class Main {
 		} while (opcion != 0);
 		
 		leer.close();
+	}
+
+	private static void cargarDatos(ArrayList<Alumno> alumnos, File f) {
+		if (f.exists()) {
+			ArrayList<Alumno> copia = new ArrayList<>();
+			
+			try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f))) {
+				while (true) {
+					Alumno a = (Alumno) in.readObject();
+					copia.add(a);
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (EOFException e) {
+				alumnos.clear();
+				alumnos.addAll(copia);
+				
+				System.out.println("\nDatos cargados con éxito\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("\nEl archivo de guardado para poder leer no existe\n");
+		}
+	}
+
+	private static void guardarDatos(ArrayList<Alumno> alumnos, File f) {
+		if (alumnos.size() > 0) {
+			try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f))) {
+				for (int i = 0; i < alumnos.size(); i++) {
+					out.writeObject(out);
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			System.out.println("\nDatos guardados con éxito\n");
+		} else {
+			System.out.println("\nNo existe ningún alumno almacenado\n");
+		}
+	}
+
+	private static void eliminarAlumno(Scanner leer, ArrayList<Alumno> alumnos) {
+		String entrada;
+		int num;
+		
+		if (alumnos.size() > 0) {
+			try {
+				System.out.print("\nIntroduzca el número de expediente del alumno: ");
+				entrada = leer.nextLine();
+				
+				num = Integer.parseInt(entrada);
+				boolean existe = false;
+				
+				for (int i = 0; i < alumnos.size(); i++) {
+					if (alumnos.get(i).getNumExp() == num) {
+						alumnos.remove(i);
+						existe = true;
+						break;
+					}
+				}
+				
+				if (!existe) {
+					System.out.println("El alumno con el número de expediente: " + num + " no existe\n");
+				} else {
+					System.out.println("El alumno con el número de expediente: " + num + " eliminado\n");
+				}
+				
+			} catch (NumberFormatException e) {
+				System.out.println("Error: el valor introducido no es válido\n");
+			}
+		} else {
+			System.out.println("\nNo existe ningún alumno almacenado\n");
+		}
 	}
 
 	private static void mostrarMayorNota(ArrayList<Alumno> alumnos) {
